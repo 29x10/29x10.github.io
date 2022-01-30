@@ -1,6 +1,14 @@
 ---
-title: "Openssl"
+title: openssl
 date: 2022-01-29T21:10:52+08:00
+summary: Documentation on how to handle certificate
+tags:
+  - openssl
+  - certificate
+  - SSL
+  - mTLS
+categories:
+  - openssl
 ---
 
 # OpenSSL

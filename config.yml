@@ -2,6 +2,25 @@ baseURL: https://29x10.github.io
 languageCode: en-us
 title: Jerome coding camp
 theme: PaperMod
+
+menu:
+  main:
+    - name: Archive
+      url: archives/
+    - name: Tags
+      url: tags/
+    - name: Categories
+      url: categories/
+
 params:
   ShowToc: true
   TocOpen: true
+  ShowCodeCopyButtons: true
+  homeInfoParams:
+    Title: "Jerome coding camp"
+    Content: >
+      Welcome to Jerome's coding camp.
+      
+      - Hopefully there are take away when you leave.
+
+  
