@@ -9,6 +9,7 @@ tags:
   - mTLS
 categories:
   - openssl
+author: Jerome
 ---
 
 # OpenSSL
@@ -20,6 +21,7 @@ categories:
 3. https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html
 4. https://www.openssl.org/docs/man1.1.1/man1/openssl-genpkey.html
 
+---
 
 ## Private key
 
@@ -46,6 +48,8 @@ DEK-Info: AES-256-CBC,F8C9D9D84DC90042F39580997E1FECE6
 -----END RSA PRIVATE KEY-----
 ```
 
+---
+
 ### PKCS#8
 
 When using `openssl genpkey` command, the private key are in *PKCS#8* format
@@ -65,6 +69,8 @@ Example of encrypted by `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits
 ...
 -----END ENCRYPTED PRIVATE KEY-----
 ```
+
+---
 
 ### How to convert
 
@@ -98,6 +104,8 @@ openssl pkcs8 -in private_pkcs1.pem -topk8 \
 -passin pass:password -passout pass:new_password
 ```
 
+---
+
 #### **PKCS#8** -> **PKCS#1**
 
 Unencrypted in **PKCS#8** and unencrypted in **PKCS#1**
@@ -127,6 +135,8 @@ openssl rsa -in private_pkcs8.pem \
 -passin pass:password -aes256 -passout pass:new_password
 ```
 
+---
+
 ### How to check
 
 validate password and check bits
@@ -140,6 +150,8 @@ checking encryption cipher of **PKCS#8**
 ```
 openssl asn1parse -in encrypted.pkcs8.pem
 ```
+
+---
 
 ## CSR configuration
 
@@ -172,6 +184,8 @@ DNS.2 = LB_FQDN
 IP.1 = 192.168.1.1
 ```
 
+---
+
 ## Certificate Signing Request (CSR)
 
 ### Create
@@ -185,5 +199,7 @@ openssl req -new -config csrconfig.conf -out server.csr -passout pass:password
 ```shell
 openssl req -in server.csr -text -noout
 ```
+
+---
 
 ## Create CA
