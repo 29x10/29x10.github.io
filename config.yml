@@ -1,0 +1,7 @@
+baseURL: http://example.org/
+languageCode: en-us
+title: Jerome coding camp
+theme: PaperMod
+params:
+  ShowToc: true
+  TocOpen: true
