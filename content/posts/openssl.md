@@ -177,3 +177,5 @@ openssl req -new -config csrconfig.conf -out server.csr -passout pass:password
 ```shell
 openssl req -in server.csr -text -noout
 ```
+
+## Create CA
