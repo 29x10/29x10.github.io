@@ -20,6 +20,7 @@ author: Jerome
 2. https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html
 3. https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html
 4. https://www.openssl.org/docs/man1.1.1/man1/openssl-genpkey.html
+5. https://www.openssl.org/docs/man1.1.1/man1/openssl-x509.html
 
 ---
 
@@ -190,9 +191,19 @@ IP.1 = 192.168.1.1
 
 ### Create
 
+Private key encrypted
+
 ``` shell
 openssl req -new -config csrconfig.conf -out server.csr -passout pass:password
 ```
+
+Private key unencrypted
+
+``` shell
+openssl req -new -config csrconfig.conf -out server.csr -nodes
+```
+
+---
 
 ### Validate
 
@@ -203,3 +214,30 @@ openssl req -in server.csr -text -noout
 ---
 
 ## Create CA
+
+```
+openssl genrsa -out rootCA.key 2048
+
+openssl req -x509  -new -nodes \
+-key rootCA.key \
+-days 3650 \
+-out rootCA.pem \
+-subj "/C=CN/ST=Province/L=City/O=TestOrg/OU=TestBU/CN=TestCA"
+```
+
+---
+
+## Sign certificate by CA
+
+```
+openssl x509 -req \
+ -in server.csr \
+ -extensions server_ext \
+ -CA rootCA.pem \
+ -CAkey rootCA.key \
+ -CAcreateserial \
+ -out server.crt \
+ -days 365 \
+ -extfile \
+ <(echo "[server_ext]"; echo "extendedKeyUsage=serverAuth,clientAuth"; echo "subjectAltName=DNS:HOST_1_FQDN,DNS:LB_FQDN,IP:192.168.1.1")
+```
