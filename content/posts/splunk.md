@@ -17,6 +17,8 @@ $SPLUNK_HOME/etc/system/local/server.conf
 
 Related documentations
 
+* https://docs.splunk.com/Documentation/Splunk/8.2.5/Security/ConfigureS2Sonnewcipher
+
 ``` ini
 [node_auth]
 signatureVersion = v2
@@ -32,6 +34,7 @@ useSSLCompression = true
 
 [sslConfig]
 sslRootCAPath = 
+requireClientCert = true
 
 [kvstore]
 storageEngine = wiredTiger
@@ -154,3 +157,16 @@ https://docs.splunk.com/Documentation/Splunk/8.2.5/Analytics/Charts#Recover_work
 
 
 edit `$SPLUNK_HOME/etc/apps/splunk_metrics_workspace/src/main/resources/splunk/default`, In the features stanza, add the following line: `state_restore = 0`.
+
+## Configure network ACLs in Splunk Enterprise
+
+https://docs.splunk.com/Documentation/Splunk/8.2.5/Security/Useaccesscontrollists
+
+## Configure password policy
+
+https://docs.splunk.com/Documentation/Splunk/8.2.5/Security/Configurepasswordsinspecfile
+
+
+## Secure SSO with TLS certificates on Splunk Enterprise
+
+http://docs.splunk.com/Documentation/Splunk/8.2.5/Security/ConfigureSSLforSSO
