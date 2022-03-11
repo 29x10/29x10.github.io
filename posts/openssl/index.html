@@ -1,196 +1,38 @@
-<!doctype html><html lang=en dir=auto>
-<head><meta charset=utf-8>
-<meta http-equiv=x-ua-compatible content="IE=edge">
-<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<meta name=robots content="index, follow">
-<title>openssl | coding camp</title>
-<meta name=keywords content="openssl,certificate,SSL,mTLS">
-<meta name=description content="Documentation on how to handle certificate">
-<meta name=author content="Jerome">
-<link rel=canonical href=https://29x10.github.io/posts/openssl/>
-<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
-<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
-<link rel=icon href=https://29x10.github.io/favicon.ico>
-<link rel=icon type=image/png sizes=16x16 href=https://29x10.github.io/favicon-16x16.png>
-<link rel=icon type=image/png sizes=32x32 href=https://29x10.github.io/favicon-32x32.png>
-<link rel=apple-touch-icon href=https://29x10.github.io/apple-touch-icon.png>
-<link rel=mask-icon href=https://29x10.github.io/safari-pinned-tab.svg>
-<meta name=theme-color content="#2e2e33">
-<meta name=msapplication-TileColor content="#2e2e33">
-<meta name=generator content="Hugo 0.92.2">
-<noscript>
-<style>#theme-toggle,.top-link{display:none}</style>
-<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
-</noscript><meta property="og:title" content="openssl">
-<meta property="og:description" content="Documentation on how to handle certificate">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://29x10.github.io/posts/openssl/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2022-01-29T21:10:52+08:00">
-<meta property="article:modified_time" content="2022-01-29T21:10:52+08:00">
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="openssl">
-<meta name=twitter:description content="Documentation on how to handle certificate">
-<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":2,"name":"Posts","item":"https://29x10.github.io/posts/"},{"@type":"ListItem","position":3,"name":"openssl","item":"https://29x10.github.io/posts/openssl/"}]}</script>
-<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"openssl","name":"openssl","description":"Documentation on how to handle certificate","keywords":["openssl","certificate","SSL","mTLS"],"articleBody":"OpenSSL Documentation  https://www.openssl.org/docs/man1.1.1/man1/openssl-rsa.html https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html https://www.openssl.org/docs/man1.1.1/man1/openssl-genpkey.html https://www.openssl.org/docs/man1.1.1/man1/openssl-x509.html   Private key PKCS#1 When using openssl genrsa command, the private key are in PKCS#1 format\nExample of unencrypted by openssl genrsa 2048\n-----BEGIN RSA PRIVATE KEY----- ... -----END RSA PRIVATE KEY----- Example of encrypted by openssl genrsa -aes256 -passout pass:password 2048\n-----BEGIN RSA PRIVATE KEY----- Proc-Type: 4,ENCRYPTED DEK-Info: AES-256-CBC,F8C9D9D84DC90042F39580997E1FECE6 ... -----END RSA PRIVATE KEY-----  PKCS#8 When using openssl genpkey command, the private key are in PKCS#8 format\nExample of unencrypted by openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048\n-----BEGIN PRIVATE KEY----- ... -----END PRIVATE KEY----- Example of encrypted by openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -aes256 -pass pass:password\n-----BEGIN ENCRYPTED PRIVATE KEY----- ... -----END ENCRYPTED PRIVATE KEY-----  How to convert PKCS#1 - PKCS#8 Unencrypted in PKCS#1 and unencrypted in PKCS#8\nopenssl pkcs8 -in private_pkcs1.pem -topk8 \\ -nocrypt Unencrypted in PKCS#1 and encrypted in PKCS#8\nopenssl pkcs8 -in private_pkcs1.pem -topk8 \\ -passout pass:password Encrypted in PKCS#1, but unencrypted in PKCS#8\nopenssl pkcs8 -in private_pkcs1.pem -topk8 \\ -passin pass:password -nocrypt Encrypted in PKCS#1, and encrypted in PKCS#8\nopenssl pkcs8 -in private_pkcs1.pem -topk8 \\ -passin pass:password -passout pass:new_password  PKCS#8 - PKCS#1 Unencrypted in PKCS#8 and unencrypted in PKCS#1\nopenssl rsa -in private_pkcs8.pem Unencrypted in PKCS#8 but encrypted in PKCS#1\nopenssl rsa -in private_pkcs8.pem \\ -aes256 -passout pass:password Encrypted in PKCS#8 but unencrypted in PKCS#1\nopenssl rsa -in private_pkcs8.pem \\ -passin pass:password Encrypted in PKCS#8 and encrypted in PKCS#1\nopenssl rsa -in private_pkcs8.pem \\ -passin pass:password -aes256 -passout pass:new_password  How to check validate password and check bits\nopenssl rsa -passin pass:password -text -noout -in key.pem checking encryption cipher of PKCS#8\nopenssl asn1parse -in encrypted.pkcs8.pem  CSR configuration Configuration documentation can be found here\nAvailable subject alternative name can be found here\n[req] default_bits = 2048 default_keyfile = key.pem distinguished_name = req_distinguished_name prompt = no req_extensions = v3_req [req_distinguished_name] C = CN ST = Province L = City O = Organization OU = Organization Unit Name CN = Common Name emailAddress = contact@domain [v3_req] subjectAltName = @alt_section [alt_section] DNS.1 = HOST_1_FQDN DNS.2 = LB_FQDN IP.1 = 192.168.1.1  Certificate Signing Request (CSR) Create Private key encrypted\nopenssl req -new -config csrconfig.conf -out server.csr -passout pass:password Private key unencrypted\nopenssl req -new -config csrconfig.conf -out server.csr -nodes  Validate openssl req -in server.csr -text -noout  Create CA openssl genrsa -out rootCA.key 2048 openssl req -x509 -new -nodes \\ -key rootCA.key \\ -days 3650 \\ -out rootCA.pem \\ -subj \"/C=CN/ST=Province/L=City/O=TestOrg/OU=TestBU/CN=TestCA\"  Sign certificate by CA openssl x509 -req \\ -in server.csr \\ -extensions server_ext \\ -CA rootCA.pem \\ -CAkey rootCA.key \\ -CAcreateserial \\ -out server.crt \\ -days 365 \\ -extfile \\ ","wordCount":"432","inLanguage":"en","datePublished":"2022-01-29T21:10:52+08:00","dateModified":"2022-01-29T21:10:52+08:00","author":{"@type":"Person","name":"Jerome"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://29x10.github.io/posts/openssl/"},"publisher":{"@type":"Organization","name":"coding camp","logo":{"@type":"ImageObject","url":"https://29x10.github.io/favicon.ico"}}}</script>
-</head>
-<body id=top>
-<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
-<header class=header>
-<nav class=nav>
-<div class=logo>
-<a href=https://29x10.github.io accesskey=h title="coding camp (Alt + H)">coding camp</a>
-<span class=logo-switches>
-<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-</button>
-</span>
-</div>
-<ul id=menu>
-<li>
-<a href=https://29x10.github.io/archives/ title=Archive>
-<span>Archive</span>
-</a>
-</li>
-<li>
-<a href=https://29x10.github.io/categories/ title=Categories>
-<span>Categories</span>
-</a>
-</li>
-<li>
-<a href=https://29x10.github.io/tags/ title=Tags>
-<span>Tags</span>
-</a>
-</li>
-</ul>
-</nav>
-</header>
-<main class=main>
-<article class=post-single>
-<header class=post-header>
-<h1 class=post-title>
-openssl
-</h1>
-<div class=post-meta><span title="2022-01-29 21:10:52 +0800 +0800">January 29, 2022</span>&nbsp;·&nbsp;3 min&nbsp;·&nbsp;Jerome
-</div>
-</header> <div class=toc>
-<details>
-<summary accesskey=c title="(Alt + C)">
-<span class=details>Table of Contents</span>
-</summary>
-<div class=inner><ul>
-<li>
-<a href=#openssl aria-label=OpenSSL>OpenSSL</a><ul>
-<li>
-<a href=#documentation aria-label=Documentation>Documentation</a></li>
-<li>
-<a href=#private-key aria-label="Private key">Private key</a><ul>
-<li>
-<a href=#pkcs1 aria-label=PKCS#1>PKCS#1</a></li>
-<li>
-<a href=#pkcs8 aria-label=PKCS#8>PKCS#8</a></li>
-<li>
-<a href=#how-to-convert aria-label="How to convert">How to convert</a><ul>
-<li>
-<a href=#pkcs1---pkcs8 aria-label="PKCS#1 -&amp;gt; PKCS#8"><strong>PKCS#1</strong> -> <strong>PKCS#8</strong></a></li>
-<li>
-<a href=#pkcs8---pkcs1 aria-label="PKCS#8 -&amp;gt; PKCS#1"><strong>PKCS#8</strong> -> <strong>PKCS#1</strong></a></li></ul>
-</li>
-<li>
-<a href=#how-to-check aria-label="How to check">How to check</a></li></ul>
-</li>
-<li>
-<a href=#csr-configuration aria-label="CSR configuration">CSR configuration</a></li>
-<li>
-<a href=#certificate-signing-request-csr aria-label="Certificate Signing Request (CSR)">Certificate Signing Request (CSR)</a><ul>
-<li>
-<a href=#create aria-label=Create>Create</a></li>
-<li>
-<a href=#validate aria-label=Validate>Validate</a></li></ul>
-</li>
-<li>
-<a href=#create-ca aria-label="Create CA">Create CA</a></li>
-<li>
-<a href=#sign-certificate-by-ca aria-label="Sign certificate by CA">Sign certificate by CA</a>
-</li>
-</ul>
-</li>
-</ul>
-</div>
-</details>
-</div>
-<div class=post-content><h1 id=openssl>OpenSSL<a hidden class=anchor aria-hidden=true href=#openssl>#</a></h1>
-<h2 id=documentation>Documentation<a hidden class=anchor aria-hidden=true href=#documentation>#</a></h2>
-<ol>
-<li><a href=https://www.openssl.org/docs/man1.1.1/man1/openssl-rsa.html>https://www.openssl.org/docs/man1.1.1/man1/openssl-rsa.html</a></li>
-<li><a href=https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html>https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html</a></li>
-<li><a href=https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html>https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html</a></li>
-<li><a href=https://www.openssl.org/docs/man1.1.1/man1/openssl-genpkey.html>https://www.openssl.org/docs/man1.1.1/man1/openssl-genpkey.html</a></li>
-<li><a href=https://www.openssl.org/docs/man1.1.1/man1/openssl-x509.html>https://www.openssl.org/docs/man1.1.1/man1/openssl-x509.html</a></li>
-</ol>
-<hr>
-<h2 id=private-key>Private key<a hidden class=anchor aria-hidden=true href=#private-key>#</a></h2>
-<h3 id=pkcs1>PKCS#1<a hidden class=anchor aria-hidden=true href=#pkcs1>#</a></h3>
-<p>When using <code>openssl genrsa</code> command, the private key are in <strong>PKCS#1</strong> format</p>
-<p>Example of unencrypted by <code>openssl genrsa 2048</code></p>
-<pre tabindex=0><code>-----BEGIN RSA PRIVATE KEY-----
+<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>openssl | coding camp</title><meta name=keywords content="openssl,certificate,SSL,mTLS"><meta name=description content="Documentation on how to handle certificate"><meta name=author content="Jerome"><link rel=canonical href=https://29x10.github.io/posts/openssl/><link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style><script defer crossorigin=anonymous src=/assets/js/highlight.min.4dcb3c4f38462f66c6b6137227726f5543cb934cca9788f041c087e374491df2.js integrity="sha256-Tcs8TzhGL2bGthNyJ3JvVUPLk0zKl4jwQcCH43RJHfI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=https://29x10.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://29x10.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://29x10.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://29x10.github.io/apple-touch-icon.png><link rel=mask-icon href=https://29x10.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><meta name=generator content="Hugo 0.94.0"><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><meta property="og:title" content="openssl"><meta property="og:description" content="Documentation on how to handle certificate"><meta property="og:type" content="article"><meta property="og:url" content="https://29x10.github.io/posts/openssl/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-01-29T21:10:52+08:00"><meta property="article:modified_time" content="2022-01-29T21:10:52+08:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="openssl"><meta name=twitter:description content="Documentation on how to handle certificate"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":2,"name":"Posts","item":"https://29x10.github.io/posts/"},{"@type":"ListItem","position":3,"name":"openssl","item":"https://29x10.github.io/posts/openssl/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"openssl","name":"openssl","description":"Documentation on how to handle certificate","keywords":["openssl","certificate","SSL","mTLS"],"articleBody":"OpenSSL Documentation  https://www.openssl.org/docs/man1.1.1/man1/openssl-rsa.html https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html https://www.openssl.org/docs/man1.1.1/man1/openssl-genpkey.html https://www.openssl.org/docs/man1.1.1/man1/openssl-x509.html   Private key PKCS#1 When using openssl genrsa command, the private key are in PKCS#1 format\nExample of unencrypted by openssl genrsa 2048\n-----BEGIN RSA PRIVATE KEY----- ... -----END RSA PRIVATE KEY----- Example of encrypted by openssl genrsa -aes256 -passout pass:password 2048\n-----BEGIN RSA PRIVATE KEY----- Proc-Type: 4,ENCRYPTED DEK-Info: AES-256-CBC,F8C9D9D84DC90042F39580997E1FECE6 ... -----END RSA PRIVATE KEY-----  PKCS#8 When using openssl genpkey command, the private key are in PKCS#8 format\nExample of unencrypted by openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048\n-----BEGIN PRIVATE KEY----- ... -----END PRIVATE KEY----- Example of encrypted by openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -aes256 -pass pass:password\n-----BEGIN ENCRYPTED PRIVATE KEY----- ... -----END ENCRYPTED PRIVATE KEY-----  How to convert PKCS#1 - PKCS#8 Unencrypted in PKCS#1 and unencrypted in PKCS#8\nopenssl pkcs8 -in private_pkcs1.pem -topk8 \\ -nocrypt Unencrypted in PKCS#1 and encrypted in PKCS#8\nopenssl pkcs8 -in private_pkcs1.pem -topk8 \\ -passout pass:password Encrypted in PKCS#1, but unencrypted in PKCS#8\nopenssl pkcs8 -in private_pkcs1.pem -topk8 \\ -passin pass:password -nocrypt Encrypted in PKCS#1, and encrypted in PKCS#8\nopenssl pkcs8 -in private_pkcs1.pem -topk8 \\ -passin pass:password -passout pass:new_password  PKCS#8 - PKCS#1 Unencrypted in PKCS#8 and unencrypted in PKCS#1\nopenssl rsa -in private_pkcs8.pem Unencrypted in PKCS#8 but encrypted in PKCS#1\nopenssl rsa -in private_pkcs8.pem \\ -aes256 -passout pass:password Encrypted in PKCS#8 but unencrypted in PKCS#1\nopenssl rsa -in private_pkcs8.pem \\ -passin pass:password Encrypted in PKCS#8 and encrypted in PKCS#1\nopenssl rsa -in private_pkcs8.pem \\ -passin pass:password -aes256 -passout pass:new_password  How to check validate password and check bits\nopenssl rsa -passin pass:password -text -noout -in key.pem checking encryption cipher of PKCS#8\nopenssl asn1parse -in encrypted.pkcs8.pem  CSR configuration Configuration documentation can be found here\nAvailable subject alternative name can be found here\n[req] default_bits = 2048 default_keyfile = key.pem distinguished_name = req_distinguished_name prompt = no req_extensions = v3_req [req_distinguished_name] C = CN ST = Province L = City O = Organization OU = Organization Unit Name CN = Common Name emailAddress = contact@domain [v3_req] subjectAltName = @alt_section [alt_section] DNS.1 = HOST_1_FQDN DNS.2 = LB_FQDN IP.1 = 192.168.1.1  Certificate Signing Request (CSR) Create Private key encrypted\nopenssl req -new -config csrconfig.conf -out server.csr -passout pass:password Private key unencrypted\nopenssl req -new -config csrconfig.conf -out server.csr -nodes  Validate openssl req -in server.csr -text -noout  Create CA openssl genrsa -out rootCA.key 2048 openssl req -x509 -new -nodes \\ -key rootCA.key \\ -days 3650 \\ -out rootCA.pem \\ -subj \"/C=CN/ST=Province/L=City/O=TestOrg/OU=TestBU/CN=TestCA\"  Sign certificate by CA openssl x509 -req \\ -in server.csr \\ -extensions server_ext \\ -CA rootCA.pem \\ -CAkey rootCA.key \\ -CAcreateserial \\ -out server.crt \\ -days 365 \\ -extfile \\ ","wordCount":"432","inLanguage":"en","datePublished":"2022-01-29T21:10:52+08:00","dateModified":"2022-01-29T21:10:52+08:00","author":{"@type":"Person","name":"Jerome"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://29x10.github.io/posts/openssl/"},"publisher":{"@type":"Organization","name":"coding camp","logo":{"@type":"ImageObject","url":"https://29x10.github.io/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://29x10.github.io accesskey=h title="coding camp (Alt + H)">coding camp</a>
+<span class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></span></div><ul id=menu><li><a href=https://29x10.github.io/archives/ title=Archive><span>Archive</span></a></li><li><a href=https://29x10.github.io/categories/ title=Categories><span>Categories</span></a></li><li><a href=https://29x10.github.io/tags/ title=Tags><span>Tags</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><h1 class=post-title>openssl</h1><div class=post-meta><span title="2022-01-29 21:10:52 +0800 +0800">January 29, 2022</span>&nbsp;·&nbsp;3 min&nbsp;·&nbsp;Jerome</div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><ul><li><a href=#openssl aria-label=OpenSSL>OpenSSL</a><ul><li><a href=#documentation aria-label=Documentation>Documentation</a></li><li><a href=#private-key aria-label="Private key">Private key</a><ul><li><a href=#pkcs1 aria-label=PKCS#1>PKCS#1</a></li><li><a href=#pkcs8 aria-label=PKCS#8>PKCS#8</a></li><li><a href=#how-to-convert aria-label="How to convert">How to convert</a><ul><li><a href=#pkcs1---pkcs8 aria-label="PKCS#1 -&amp;gt; PKCS#8"><strong>PKCS#1</strong> -> <strong>PKCS#8</strong></a></li><li><a href=#pkcs8---pkcs1 aria-label="PKCS#8 -&amp;gt; PKCS#1"><strong>PKCS#8</strong> -> <strong>PKCS#1</strong></a></li></ul></li><li><a href=#how-to-check aria-label="How to check">How to check</a></li></ul></li><li><a href=#csr-configuration aria-label="CSR configuration">CSR configuration</a></li><li><a href=#certificate-signing-request-csr aria-label="Certificate Signing Request (CSR)">Certificate Signing Request (CSR)</a><ul><li><a href=#create aria-label=Create>Create</a></li><li><a href=#validate aria-label=Validate>Validate</a></li></ul></li><li><a href=#create-ca aria-label="Create CA">Create CA</a></li><li><a href=#sign-certificate-by-ca aria-label="Sign certificate by CA">Sign certificate by CA</a></li></ul></li></ul></div></details></div><div class=post-content><h1 id=openssl>OpenSSL<a hidden class=anchor aria-hidden=true href=#openssl>#</a></h1><h2 id=documentation>Documentation<a hidden class=anchor aria-hidden=true href=#documentation>#</a></h2><ol><li><a href=https://www.openssl.org/docs/man1.1.1/man1/openssl-rsa.html>https://www.openssl.org/docs/man1.1.1/man1/openssl-rsa.html</a></li><li><a href=https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html>https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html</a></li><li><a href=https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html>https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html</a></li><li><a href=https://www.openssl.org/docs/man1.1.1/man1/openssl-genpkey.html>https://www.openssl.org/docs/man1.1.1/man1/openssl-genpkey.html</a></li><li><a href=https://www.openssl.org/docs/man1.1.1/man1/openssl-x509.html>https://www.openssl.org/docs/man1.1.1/man1/openssl-x509.html</a></li></ol><hr><h2 id=private-key>Private key<a hidden class=anchor aria-hidden=true href=#private-key>#</a></h2><h3 id=pkcs1>PKCS#1<a hidden class=anchor aria-hidden=true href=#pkcs1>#</a></h3><p>When using <code>openssl genrsa</code> command, the private key are in <strong>PKCS#1</strong> format</p><p>Example of unencrypted by <code>openssl genrsa 2048</code></p><pre tabindex=0><code>-----BEGIN RSA PRIVATE KEY-----
 ...
 -----END RSA PRIVATE KEY-----
-</code></pre><p>Example of encrypted by <code>openssl genrsa -aes256 -passout pass:password 2048</code></p>
-<pre tabindex=0><code>-----BEGIN RSA PRIVATE KEY-----
+</code></pre><p>Example of encrypted by <code>openssl genrsa -aes256 -passout pass:password 2048</code></p><pre tabindex=0><code>-----BEGIN RSA PRIVATE KEY-----
 Proc-Type: 4,ENCRYPTED
 DEK-Info: AES-256-CBC,F8C9D9D84DC90042F39580997E1FECE6
 
 ...
 -----END RSA PRIVATE KEY-----
-</code></pre><hr>
-<h3 id=pkcs8>PKCS#8<a hidden class=anchor aria-hidden=true href=#pkcs8>#</a></h3>
-<p>When using <code>openssl genpkey</code> command, the private key are in <em>PKCS#8</em> format</p>
-<p>Example of unencrypted by <code>openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048</code></p>
-<pre tabindex=0><code>-----BEGIN PRIVATE KEY-----
+</code></pre><hr><h3 id=pkcs8>PKCS#8<a hidden class=anchor aria-hidden=true href=#pkcs8>#</a></h3><p>When using <code>openssl genpkey</code> command, the private key are in <em>PKCS#8</em> format</p><p>Example of unencrypted by <code>openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048</code></p><pre tabindex=0><code>-----BEGIN PRIVATE KEY-----
 ...
 -----END PRIVATE KEY-----
-</code></pre><p>Example of encrypted by <code>openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -aes256 -pass pass:password</code></p>
-<pre tabindex=0><code>-----BEGIN ENCRYPTED PRIVATE KEY-----
+</code></pre><p>Example of encrypted by <code>openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -aes256 -pass pass:password</code></p><pre tabindex=0><code>-----BEGIN ENCRYPTED PRIVATE KEY-----
 ...
 -----END ENCRYPTED PRIVATE KEY-----
-</code></pre><hr>
-<h3 id=how-to-convert>How to convert<a hidden class=anchor aria-hidden=true href=#how-to-convert>#</a></h3>
-<h4 id=pkcs1---pkcs8><strong>PKCS#1</strong> -> <strong>PKCS#8</strong><a hidden class=anchor aria-hidden=true href=#pkcs1---pkcs8>#</a></h4>
-<p>Unencrypted in <strong>PKCS#1</strong> and unencrypted in <strong>PKCS#8</strong></p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>openssl pkcs8 -in private_pkcs1.pem -topk8 <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>-nocrypt
-</code></pre></div><p>Unencrypted in <strong>PKCS#1</strong> and encrypted in <strong>PKCS#8</strong></p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>openssl pkcs8 -in private_pkcs1.pem -topk8 <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>-passout pass:password
-</code></pre></div><p>Encrypted in <strong>PKCS#1</strong>, but unencrypted in <strong>PKCS#8</strong></p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>openssl pkcs8 -in private_pkcs1.pem -topk8 <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>-passin pass:password -nocrypt
-</code></pre></div><p>Encrypted in <strong>PKCS#1</strong>, and encrypted in <strong>PKCS#8</strong></p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>openssl pkcs8 -in private_pkcs1.pem -topk8 <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>-passin pass:password -passout pass:new_password
-</code></pre></div><hr>
-<h4 id=pkcs8---pkcs1><strong>PKCS#8</strong> -> <strong>PKCS#1</strong><a hidden class=anchor aria-hidden=true href=#pkcs8---pkcs1>#</a></h4>
-<p>Unencrypted in <strong>PKCS#8</strong> and unencrypted in <strong>PKCS#1</strong></p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>openssl rsa -in private_pkcs8.pem
-</code></pre></div><p>Unencrypted in <strong>PKCS#8</strong> but encrypted in <strong>PKCS#1</strong></p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>openssl rsa -in private_pkcs8.pem <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>-aes256 -passout pass:password
-</code></pre></div><p>Encrypted in <strong>PKCS#8</strong> but unencrypted in <strong>PKCS#1</strong></p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>openssl rsa -in private_pkcs8.pem <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>-passin pass:password
-</code></pre></div><p>Encrypted in <strong>PKCS#8</strong> and encrypted in <strong>PKCS#1</strong></p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>openssl rsa -in private_pkcs8.pem <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>-passin pass:password -aes256 -passout pass:new_password
-</code></pre></div><hr>
-<h3 id=how-to-check>How to check<a hidden class=anchor aria-hidden=true href=#how-to-check>#</a></h3>
-<p>validate password and check bits</p>
-<pre tabindex=0><code>openssl rsa -passin pass:password -text -noout -in key.pem
-</code></pre><p>checking encryption cipher of <strong>PKCS#8</strong></p>
-<pre tabindex=0><code>openssl asn1parse -in encrypted.pkcs8.pem
-</code></pre><hr>
-<h2 id=csr-configuration>CSR configuration<a hidden class=anchor aria-hidden=true href=#csr-configuration>#</a></h2>
-<p>Configuration documentation can be found <a href=https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html#CONFIGURATION-FILE-FORMAT>here</a></p>
-<p>Available subject alternative name can be found <a href=https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html#Subject-Alternative-Name>here</a></p>
-<pre tabindex=0><code>[req]
+</code></pre><hr><h3 id=how-to-convert>How to convert<a hidden class=anchor aria-hidden=true href=#how-to-convert>#</a></h3><h4 id=pkcs1---pkcs8><strong>PKCS#1</strong> -> <strong>PKCS#8</strong><a hidden class=anchor aria-hidden=true href=#pkcs1---pkcs8>#</a></h4><p>Unencrypted in <strong>PKCS#1</strong> and unencrypted in <strong>PKCS#8</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>openssl pkcs8 -in private_pkcs1.pem -topk8 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span><span style=color:#ae81ff></span>-nocrypt
+</span></span></code></pre></div><p>Unencrypted in <strong>PKCS#1</strong> and encrypted in <strong>PKCS#8</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>openssl pkcs8 -in private_pkcs1.pem -topk8 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span><span style=color:#ae81ff></span>-passout pass:password
+</span></span></code></pre></div><p>Encrypted in <strong>PKCS#1</strong>, but unencrypted in <strong>PKCS#8</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>openssl pkcs8 -in private_pkcs1.pem -topk8 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span><span style=color:#ae81ff></span>-passin pass:password -nocrypt
+</span></span></code></pre></div><p>Encrypted in <strong>PKCS#1</strong>, and encrypted in <strong>PKCS#8</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>openssl pkcs8 -in private_pkcs1.pem -topk8 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span><span style=color:#ae81ff></span>-passin pass:password -passout pass:new_password
+</span></span></code></pre></div><hr><h4 id=pkcs8---pkcs1><strong>PKCS#8</strong> -> <strong>PKCS#1</strong><a hidden class=anchor aria-hidden=true href=#pkcs8---pkcs1>#</a></h4><p>Unencrypted in <strong>PKCS#8</strong> and unencrypted in <strong>PKCS#1</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>openssl rsa -in private_pkcs8.pem
+</span></span></code></pre></div><p>Unencrypted in <strong>PKCS#8</strong> but encrypted in <strong>PKCS#1</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>openssl rsa -in private_pkcs8.pem <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span><span style=color:#ae81ff></span>-aes256 -passout pass:password
+</span></span></code></pre></div><p>Encrypted in <strong>PKCS#8</strong> but unencrypted in <strong>PKCS#1</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>openssl rsa -in private_pkcs8.pem <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span><span style=color:#ae81ff></span>-passin pass:password
+</span></span></code></pre></div><p>Encrypted in <strong>PKCS#8</strong> and encrypted in <strong>PKCS#1</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>openssl rsa -in private_pkcs8.pem <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span><span style=color:#ae81ff></span>-passin pass:password -aes256 -passout pass:new_password
+</span></span></code></pre></div><hr><h3 id=how-to-check>How to check<a hidden class=anchor aria-hidden=true href=#how-to-check>#</a></h3><p>validate password and check bits</p><pre tabindex=0><code>openssl rsa -passin pass:password -text -noout -in key.pem
+</code></pre><p>checking encryption cipher of <strong>PKCS#8</strong></p><pre tabindex=0><code>openssl asn1parse -in encrypted.pkcs8.pem
+</code></pre><hr><h2 id=csr-configuration>CSR configuration<a hidden class=anchor aria-hidden=true href=#csr-configuration>#</a></h2><p>Configuration documentation can be found <a href=https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html#CONFIGURATION-FILE-FORMAT>here</a></p><p>Available subject alternative name can be found <a href=https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html#Subject-Alternative-Name>here</a></p><pre tabindex=0><code>[req]
 default_bits = 2048
 default_keyfile = key.pem
 distinguished_name = req_distinguished_name
@@ -213,28 +55,17 @@ subjectAltName = @alt_section
 DNS.1 = HOST_1_FQDN
 DNS.2 = LB_FQDN
 IP.1 = 192.168.1.1
-</code></pre><hr>
-<h2 id=certificate-signing-request-csr>Certificate Signing Request (CSR)<a hidden class=anchor aria-hidden=true href=#certificate-signing-request-csr>#</a></h2>
-<h3 id=create>Create<a hidden class=anchor aria-hidden=true href=#create>#</a></h3>
-<p>Private key encrypted</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>openssl req -new -config csrconfig.conf -out server.csr -passout pass:password
-</code></pre></div><p>Private key unencrypted</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>openssl req -new -config csrconfig.conf -out server.csr -nodes
-</code></pre></div><hr>
-<h3 id=validate>Validate<a hidden class=anchor aria-hidden=true href=#validate>#</a></h3>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>openssl req -in server.csr -text -noout
-</code></pre></div><hr>
-<h2 id=create-ca>Create CA<a hidden class=anchor aria-hidden=true href=#create-ca>#</a></h2>
-<pre tabindex=0><code>openssl genrsa -out rootCA.key 2048
+</code></pre><hr><h2 id=certificate-signing-request-csr>Certificate Signing Request (CSR)<a hidden class=anchor aria-hidden=true href=#certificate-signing-request-csr>#</a></h2><h3 id=create>Create<a hidden class=anchor aria-hidden=true href=#create>#</a></h3><p>Private key encrypted</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>openssl req -new -config csrconfig.conf -out server.csr -passout pass:password
+</span></span></code></pre></div><p>Private key unencrypted</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>openssl req -new -config csrconfig.conf -out server.csr -nodes
+</span></span></code></pre></div><hr><h3 id=validate>Validate<a hidden class=anchor aria-hidden=true href=#validate>#</a></h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>openssl req -in server.csr -text -noout
+</span></span></code></pre></div><hr><h2 id=create-ca>Create CA<a hidden class=anchor aria-hidden=true href=#create-ca>#</a></h2><pre tabindex=0><code>openssl genrsa -out rootCA.key 2048
 
 openssl req -x509  -new -nodes \
 -key rootCA.key \
 -days 3650 \
 -out rootCA.pem \
--subj &quot;/C=CN/ST=Province/L=City/O=TestOrg/OU=TestBU/CN=TestCA&quot;
-</code></pre><hr>
-<h2 id=sign-certificate-by-ca>Sign certificate by CA<a hidden class=anchor aria-hidden=true href=#sign-certificate-by-ca>#</a></h2>
-<pre tabindex=0><code>openssl x509 -req \
+-subj &#34;/C=CN/ST=Province/L=City/O=TestOrg/OU=TestBU/CN=TestCA&#34;
+</code></pre><hr><h2 id=sign-certificate-by-ca>Sign certificate by CA<a hidden class=anchor aria-hidden=true href=#sign-certificate-by-ca>#</a></h2><pre tabindex=0><code>openssl x509 -req \
  -in server.csr \
  -extensions server_ext \
  -CA rootCA.pem \
@@ -243,32 +74,8 @@ openssl req -x509  -new -nodes \
  -out server.crt \
  -days 365 \
  -extfile \
- &lt;(echo &quot;[server_ext]&quot;; echo &quot;extendedKeyUsage=serverAuth,clientAuth&quot;; echo &quot;subjectAltName=DNS:HOST_1_FQDN,DNS:LB_FQDN,IP:192.168.1.1&quot;)
-</code></pre>
-</div>
-<footer class=post-footer>
-<ul class=post-tags>
-<li><a href=https://29x10.github.io/tags/openssl/>openssl</a></li>
-<li><a href=https://29x10.github.io/tags/certificate/>certificate</a></li>
-<li><a href=https://29x10.github.io/tags/ssl/>SSL</a></li>
-<li><a href=https://29x10.github.io/tags/mtls/>mTLS</a></li>
-</ul>
-</footer>
-</article>
-</main>
-<footer class=footer>
-<span>&copy; 2022 <a href=https://29x10.github.io>coding camp</a></span>
-<span>
-Powered by
+ &lt;(echo &#34;[server_ext]&#34;; echo &#34;extendedKeyUsage=serverAuth,clientAuth&#34;; echo &#34;subjectAltName=DNS:HOST_1_FQDN,DNS:LB_FQDN,IP:192.168.1.1&#34;)
+</code></pre></div><footer class=post-footer><ul class=post-tags><li><a href=https://29x10.github.io/tags/openssl/>openssl</a></li><li><a href=https://29x10.github.io/tags/certificate/>certificate</a></li><li><a href=https://29x10.github.io/tags/ssl/>SSL</a></li><li><a href=https://29x10.github.io/tags/mtls/>mTLS</a></li></ul></footer></article></main><footer class=footer><span>&copy; 2022 <a href=https://29x10.github.io>coding camp</a></span>
+<span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
-        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
-</span>
-</footer>
-<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
-</a>
-<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
-<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
-<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
-<script>document.querySelectorAll('pre > code').forEach(b=>{const c=b.parentNode.parentNode,a=document.createElement('button');a.classList.add('copy-code'),a.innerText='copy';function d(){a.innerText='copied!',setTimeout(()=>{a.innerText='copy'},2e3)}a.addEventListener('click',e=>{if('clipboard'in navigator){navigator.clipboard.writeText(b.textContent),d();return}const a=document.createRange();a.selectNodeContents(b);const c=window.getSelection();c.removeAllRanges(),c.addRange(a);try{document.execCommand('copy'),d()}catch(a){}c.removeRange(a)}),c.classList.contains("highlight")?c.appendChild(a):c.parentNode.firstChild==c||(b.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?b.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(a):b.parentNode.appendChild(a))})</script>
-</body>
-</html>
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg></a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(t){t.preventDefault();var e=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(e)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(e)}']`).scrollIntoView({behavior:"smooth"}),e==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${e}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(t=>{const n=t.parentNode.parentNode,e=document.createElement("button");e.classList.add("copy-code"),e.innerText="copy";function s(){e.innerText="copied!",setTimeout(()=>{e.innerText="copy"},2e3)}e.addEventListener("click",o=>{if("clipboard"in navigator){navigator.clipboard.writeText(t.textContent),s();return}const e=document.createRange();e.selectNodeContents(t);const n=window.getSelection();n.removeAllRanges(),n.addRange(e);try{document.execCommand("copy"),s()}catch(e){}n.removeRange(e)}),n.classList.contains("highlight")?n.appendChild(e):n.parentNode.firstChild==n||(t.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?t.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(e):t.parentNode.appendChild(e))})</script></body></html>
