@@ -71,6 +71,12 @@ Example of encrypted by `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits
 -----END ENCRYPTED PRIVATE KEY-----
 ```
 
+#### PKCS#8 V2
+
+**Currently JDK do not support PBES2**
+
+https://bugs.openjdk.java.net/browse/JDK-8231581
+
 ---
 
 ### How to convert
