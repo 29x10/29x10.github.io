@@ -14,7 +14,7 @@ menu:
 
 params:
   ShowToc: true
-  TocOpen: false
+  TocOpen: true
   displayFullLangName: true
   ShowCodeCopyButtons: true
   ShowReadingTime: true
