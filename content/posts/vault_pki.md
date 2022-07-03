@@ -60,12 +60,20 @@ vault write -format=json pki/root/sign-intermediate \
 
 vault write pki_int/intermediate/set-signed certificate=@intermediate.cert.pem
 
+vault write pki_int/config/urls \
+     issuing_certificates="$VAULT_ADDR/v1/pki_int/ca" \
+     crl_distribution_points="$VAULT_ADDR/v1/pki_int/crl"
+
 vault write pki_int/roles/ec2-dot-internal \
      issuer_ref="$(vault read -field=default pki_int/config/issuers)" \
-     allowed_domains="ec2.internal" \
-     allow_subdomains=true \
+     allow_any_name=true \
+     country="CN" \
+     province="Shanghai" \
+     locality="Shanghai" \
+     organization="Organization" \
+     ou="Department" \
      max_ttl="2160h"
 
-vault write pki_int/issue/ec2-dot-internal common_name="test.ec2.internal" ttl="2160h"
+vault write pki_int/issue/ec2-dot-internal common_name="test.ec2.internal" ttl="2160h" private_key_format="pkcs8"
 ```
 
